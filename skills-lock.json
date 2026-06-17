@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "algo-ecom-bm25": {
+      "source": "asgard-ai-platform/skills",
+      "sourceType": "github",
+      "skillPath": "algo-ecom-bm25/SKILL.md",
+      "computedHash": "55c680e7455e8090b649180197a6029242db3e68ba57536cf2fc967b7592cf2a"
+    },
+    "architecture-paradigm-layered": {
+      "source": "athola/claude-night-market",
+      "sourceType": "github",
+      "skillPath": "plugins/archetypes/skills/architecture-paradigm-layered/SKILL.md",
+      "computedHash": "1ba67ff0ac1cae61a0b92b91265a3aab4180e1fd9f20291a9f518f0e2a2e1e60"
+    },
+    "chromadb-integration-skills": {
+      "source": "kimasplund/claude_cognitive_reasoning",
+      "sourceType": "github",
+      "skillPath": "skill-frameworks/chromadb-integration-skills/SKILL.md",
+      "computedHash": "6afba43fb340b96e3f4c24136251367222fb83783f335dc1ece11740e1c1d211"
+    },
+    "corrective-rag": {
+      "source": "latestaiagents/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rag-architect/corrective-rag/SKILL.md",
+      "computedHash": "c52e43fc96b5614bac2823a46870561f15dd1ff57bb45d6b9966195c62d61501"
+    },
+    "langgraph": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/langgraph/SKILL.md",
+      "computedHash": "4a2ab8a8444cae1ef3e714c37725e693e64c9cdad63c2fc72406e3f6cb5b7c5f"
+    },
+    "prompt-engineering-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/prompt-engineering-patterns/SKILL.md",
+      "computedHash": "de45b8066301dda62d6912dfe54c4062bad1f4259a7231a9e98c55b10c49fa2e"
+    },
+    "pydantic": {
+      "source": "manutej/luxor-claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/luxor-specialized-tools/skills/pydantic/SKILL.md",
+      "computedHash": "fe50217f222aeaa7e349b38fcd911195192ffc4dd347338694fa556a0e4ad8e2"
+    },
+    "python-design-patterns": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/python-development/skills/python-design-patterns/SKILL.md",
+      "computedHash": "593f109cffd8f81019e364102ee239053c7f4477c8ad901b9551fc4afaf22bd0"
+    },
+    "python-mcp-server-generator": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/python-mcp-server-generator/SKILL.md",
+      "computedHash": "2b598920b5fdc807c9ee5b69bad23b8327c4ea5f1178c38d3a99a9e06a49e628"
+    }
+  }
+}
