@@ -6,13 +6,8 @@ permission:
     edit:
         "*": deny
         "pyproject.toml": allow
-        "src/mcp/*": allow
+        "src/mcp_server/*": allow
         "tests/*": allow
-    write:
-        "*": allow
-        "scripts/*": deny
-        "kinopoisk_api_client/*": deny
-        ".env": deny
     read:
         "*": allow
         ".env": deny

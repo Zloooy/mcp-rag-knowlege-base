@@ -120,6 +120,26 @@ class Bm25Store:
             return False
 
     # ------------------------------------------------------------------
+    # Clear / reset
+    # ------------------------------------------------------------------
+
+    def clear(self) -> None:
+        """Reset in-memory state and delete the persisted BM25 index on disk.
+
+        Use this when the underlying data source has been completely replaced
+        (e.g. a new folder is indexed) so that stale tokens from the previous
+        index cannot leak into subsequent searches.
+        """
+        if self._index_path.exists():
+            self._index_path.unlink()
+            logger.debug("BM25 index file deleted: %s", self._index_path)
+        else:
+            logger.debug("No BM25 index file to delete")
+        self._corpus = []
+        self._doc_ids = []
+        logger.info("BM25 store cleared")
+
+    # ------------------------------------------------------------------
     # Read-only accessors
     # ------------------------------------------------------------------
 

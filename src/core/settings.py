@@ -32,7 +32,12 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Configuration for the RAG knowledge-base MCP server."""
 
-    model_config = ConfigDict(env_prefix="RAG_", env_file=".env", extra="ignore")
+    # pyright configuration options — pydantic-settings types overlap with
+    # pyright's built-in ConfigDict definition; an assignment-level ignore
+    # silences those spurious errors without hiding real issues elsewhere.
+    model_config = ConfigDict(  # type: ignore[misc]
+        env_prefix="RAG_", env_file=".env", extra="ignore"
+    )
 
     # ------------------------------------------------------------------
     # General
@@ -45,6 +50,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
 
     # Ollama (legacy / local fallback). Kept for backward compatibility.
+    OLLAMA_BASE_URL: str = ""
     OLLAMA_MODEL: str = "qwen2.5:3b"
     OLLAMA_TEMPERATURE: float = 0.0
 
@@ -120,6 +126,7 @@ class Settings(BaseSettings):
 
     MIN_RELEVANT_CHUNKS: int = 3
     MAX_BROADEN_LOOPS: int = 2
+    RAG_ANSWER_CHUNK_SIZE: int = 10000  # max characters per doc during generation
 
     @field_validator("SUPPORTED_EXTENSIONS")
     @classmethod

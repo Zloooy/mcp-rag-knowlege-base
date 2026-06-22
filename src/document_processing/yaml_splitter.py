@@ -13,6 +13,31 @@ from .base import DocumentSplitter
 from .models import Chunk, SplitResult
 
 
+def _decode_text(node_bytes: bytes | None) -> str:
+    """Safely decode bytes from a tree-sitter node to string."""
+    if node_bytes is None:
+        return ""
+    return node_bytes.decode("utf-8", errors="replace")
+
+
+def _byte_to_char_offset(content: str, byte_offset: int) -> int:
+    """Convert a UTF-8 byte offset to a character offset in *content*.
+
+    Tree-sitter parses raw UTF-8 bytes and reports *start_byte* / *end_byte*.
+    Because UTF-8 is variable-width, a byte offset does not always equal a
+    character offset (e.g. emojis or non-ASCII characters).  This helper
+    decodes progressively more of the string until the accumulated byte
+    length reaches *byte_offset*, then returns the corresponding character
+    index.
+    """
+    if byte_offset <= 0:
+        return 0
+    encoded = content.encode("utf-8")
+    if byte_offset > len(encoded):
+        byte_offset = len(encoded)
+    return len(encoded[:byte_offset].decode("utf-8"))
+
+
 class YAMLSplitter(DocumentSplitter):
     """Tree-sitter-aware YAML splitter.
 
@@ -36,15 +61,15 @@ class YAMLSplitter(DocumentSplitter):
         if mapping_node is None:
             return SplitResult(chunks=[], source_file=source, file_extension=extension)
 
-        items: list[tuple[str, str, dict[str, str]]] = []
-        self._walk_pairs(mapping_node, "", items)
+        items: list[tuple[str, str, dict[str, str], int, int]] = []
+        self._walk_pairs(mapping_node, "", items, raw)
 
         chunks: list[Chunk] = []
         global_idx = 0
 
-        for key_path, value_text, meta in items:
+        for key_path, value_text, meta, pos_start, pos_end in items:
             sub_chunks = self._chunk_value(
-                key_path, value_text, meta, global_idx, extension
+                key_path, value_text, meta, pos_start, pos_end, global_idx, extension
             )
             chunks.extend(sub_chunks)
             global_idx += len(sub_chunks)
@@ -88,7 +113,7 @@ class YAMLSplitter(DocumentSplitter):
     def _scalar_name(node: ts.Node) -> str:
         """Recursively find the first scalar string under *node*."""
         if YAMLSplitter._is_scalar_type(node.type):
-            return node.text.decode("utf-8", errors="replace").strip()
+            return _decode_text(node.text).strip()
         for child in node.children:
             result = YAMLSplitter._scalar_name(child)
             if result:
@@ -120,9 +145,7 @@ class YAMLSplitter(DocumentSplitter):
         if YAMLSplitter._is_scalar_type(node.type):
             # tree-sitter-yaml reports all scalars as plain_scalar;
             # infer the actual type from text content
-            return YAMLSplitter._infer_scalar_type(
-                node.text.decode("utf-8", errors="replace").strip()
-            )
+            return YAMLSplitter._infer_scalar_type(_decode_text(node.text).strip())
         if node.type == "block_mapping":
             return "mapping"
         if node.type == "block_sequence":
@@ -133,7 +156,8 @@ class YAMLSplitter(DocumentSplitter):
         self,
         node: ts.Node,
         prefix: str,
-        results: list[tuple[str, str, dict[str, str]]],
+        results: list[tuple[str, str, dict[str, str], int, int]],
+        raw: bytes,
     ) -> None:
         if node.type != "block_mapping":
             return
@@ -158,21 +182,31 @@ class YAMLSplitter(DocumentSplitter):
             # Resolve the value node (unwrap wrappers)
             value_node = self._unwrap_wrapper(value_raw)
             value_type = self._get_value_type(value_node)
-            val_text = value_node.text.decode("utf-8", errors="replace")
+            val_text = _decode_text(value_node.text)
 
             key_path = f"{prefix}.{key}" if prefix else key
             meta: dict[str, str] = {"key_path": key_path, "value_type": value_type}
-            results.append((key_path, val_text, meta))
+
+            # Convert byte offsets to character offsets
+            pos_start = _byte_to_char_offset(
+                raw.decode("utf-8", errors="replace"), value_node.start_byte
+            )
+            pos_end = _byte_to_char_offset(
+                raw.decode("utf-8", errors="replace"), value_node.end_byte
+            )
+            results.append((key_path, val_text, meta, pos_start, pos_end))
 
             # Recurse into nested mappings to get leaf values with full paths
             if value_type == "mapping":
-                self._walk_pairs(value_node, key_path, results)
+                self._walk_pairs(value_node, key_path, results, raw)
 
     def _chunk_value(
         self,
         key_path: str,
         text: str,
         metadata: dict[str, str],
+        value_position_start: int,
+        value_position_end: int,
         start_index: int,
         extension: str = "",
     ) -> list[Chunk]:
@@ -185,6 +219,8 @@ class YAMLSplitter(DocumentSplitter):
                     chunk_index=start_index,
                     source="",
                     metadata=metadata,
+                    position_start=value_position_start,
+                    position_end=value_position_end,
                 )
             ]
 
@@ -205,6 +241,8 @@ class YAMLSplitter(DocumentSplitter):
                     chunk_index=start_index + len(chunks),
                     source="",
                     metadata=dict(metadata),
+                    position_start=value_position_start + start,
+                    position_end=value_position_start + end,
                 )
             )
             advance = size - overlap

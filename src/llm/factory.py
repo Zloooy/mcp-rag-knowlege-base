@@ -42,18 +42,18 @@ def get_chat_model() -> ChatModel:
     openai_base = settings.OPENAI_COMPLETIONS_BASE_URL.strip()
     openai_model = settings.OPENAI_COMPLETIONS_MODEL.strip()
     openai_key = settings.OPENAI_COMPLETIONS_API_KEY.strip()
-    print(settings)
 
     if openai_base and openai_model and openai_key:
-        print('Creating OpeiAI chat')
+        print("Creating OpeiAI chat")
         return OpenAICompatChat(
             base_url=openai_base,
             model=openai_model,
             api_key=openai_key,
         )
 
-    print('Creating Ollama chat')
+    print("Creating Ollama chat")
     return OllamaChat(
+        base_url=settings.OLLAMA_BASE_URL or None,
         model=settings.OLLAMA_MODEL,
         temperature=settings.OLLAMA_TEMPERATURE,
     )

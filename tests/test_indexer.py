@@ -108,6 +108,85 @@ class TestIndexFolder:
         found = any(n in src for n in expected_names for src in sources if src)
         assert found, f"Expected source filenames in metadatas, got: {sources}"
 
+    def test_metadata_contains_file_path(
+        self, chroma_dir: Path, sample_docs: Path
+    ) -> None:
+        """Each chunk's metadata should carry __file_path as an absolute path."""
+        _clear_collection(str(chroma_dir))
+        indexer = Indexer(persist_dir=str(chroma_dir))
+        indexer.index_folder(str(sample_docs))
+
+        coll = chromadb.PersistentClient(path=str(chroma_dir))
+        collection = coll.get_collection(name=settings.CHROMA_COLLECTION)
+        data = collection.get(include=["metadatas"])
+
+        # Collect chunks that belong to introduction.md
+        file_paths = [
+            m.get("__file_path", "")
+            for m in data["metadatas"]
+            if m.get("source") == "introduction.md"
+        ]
+        assert len(file_paths) > 0, "No chunks found for introduction.md"
+        intro_path = sample_docs / "introduction.md"
+        expected_abs = str(intro_path.resolve())
+        for fp in file_paths:
+            assert fp == expected_abs
+            assert Path(fp).is_absolute()
+            assert Path(fp).exists()
+
+    def test_clear_on_different_folder(
+        self, chroma_dir: Path, sample_docs: Path, tmp_path: Path
+    ) -> None:
+        """Indexing a different folder should clear previous data."""
+        _clear_collection(str(chroma_dir))
+
+        # Create a second folder with different documents
+        other_docs = tmp_path / "other_docs"
+        other_docs.mkdir()
+        (other_docs / "other.md").write_text(
+            "# Other\n\nDifferent content here.", encoding="utf-8"
+        )
+        (other_docs / "data.json").write_text('{"key": "value"}', encoding="utf-8")
+
+        # Index first folder
+        indexer_a = Indexer(persist_dir=str(chroma_dir))
+        result_a = indexer_a.index_folder(str(sample_docs))
+        assert result_a.indexed_count > 0
+        chunk_count_a = result_a.total_chunks
+
+        # Index second (different) folder — should clear everything
+        indexer_b = Indexer(persist_dir=str(chroma_dir))
+        result_b = indexer_b.index_folder(str(other_docs))
+        assert result_b.indexed_count == 2  # other.md + data.json
+
+        # Verify only second folder's data exists
+        client = chromadb.PersistentClient(path=str(chroma_dir))
+        collection = client.get_collection(name=settings.CHROMA_COLLECTION)
+
+        # Total chunks should match only second folder's chunks
+        assert collection.count() == result_b.total_chunks
+
+        # Verify no chunks from first folder remain by checking sources
+        data = collection.get(include=["metadatas"])
+        sources = {str(m.get("source", "")) for m in data["metadatas"]}
+
+        # Old folder's files should NOT be present
+        old_files = [
+            "introduction.md",
+            "python_basics.txt",
+            "config.yaml",
+            "script.py",
+        ]
+        for old_file in old_files:
+            assert not any(
+                old_file in src for src in sources
+            ), f"Expected {old_file} to be cleared, but found in sources: {sources}"
+
+        # New folder's files SHOULD be present
+        assert any(
+            "other.md" in src for src in sources
+        ), f"Expected 'other.md' in sources, got: {sources}"
+
 
 def _clear_collection(persist_dir: str) -> None:
     client = chromadb.PersistentClient(path=persist_dir)

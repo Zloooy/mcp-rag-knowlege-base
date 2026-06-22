@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 import chromadb
 from chromadb.api.types import Embeddings, Documents
+from typing_extensions import cast
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +47,8 @@ def make_chroma_embedding_fn(
         def __call__(self, input: Documents) -> Embeddings:
             # Detect whether we have a single query or multiple documents.
             if isinstance(input, str):
-                return [langchain_embeddings.embed_query(input)]
-            return langchain_embeddings.embed_documents(list(input))
+                return cast(Embeddings, [langchain_embeddings.embed_query(input)])
+            return cast(Embeddings, langchain_embeddings.embed_documents(list(input)))
 
         @staticmethod
         def name() -> str:

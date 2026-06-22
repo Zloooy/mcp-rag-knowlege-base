@@ -28,6 +28,31 @@ from .base import DocumentSplitter
 from .models import Chunk, SplitResult
 
 
+def _decode_text(node_bytes: bytes | None) -> str:
+    """Safely decode bytes from a tree-sitter node to string."""
+    if node_bytes is None:
+        return ""
+    return node_bytes.decode("utf-8", errors="replace")
+
+
+def _byte_to_char_offset(content: str, byte_offset: int) -> int:
+    """Convert a UTF-8 byte offset to a character offset in *content*.
+
+    Tree-sitter parses raw UTF-8 bytes and reports *start_byte* / *end_byte*.
+    Because UTF-8 is variable-width, a byte offset does not always equal a
+    character offset (e.g. emojis or non-ASCII characters).  This helper
+    decodes progressively more of the string until the accumulated byte
+    length reaches *byte_offset*, then returns the corresponding character
+    index.
+    """
+    if byte_offset <= 0:
+        return 0
+    encoded = content.encode("utf-8")
+    if byte_offset > len(encoded):
+        byte_offset = len(encoded)
+    return len(encoded[:byte_offset].decode("utf-8"))
+
+
 class JSONSplitter(DocumentSplitter):
     """Tree-sitter-aware JSON splitter.
 
@@ -55,17 +80,17 @@ class JSONSplitter(DocumentSplitter):
         tree = parser.parse(raw)
 
         root = tree.root_node
-        items: list[tuple[str, str, dict[str, str]]] = []
+        items: list[tuple[str, str, dict[str, str], int, int]] = []
 
         # A parsed JSON value can be an object or array at the top level
-        self._walk_value(root, "", items)
+        self._walk_value(root, "", items, raw)
 
         chunks: list[Chunk] = []
         global_idx = 0
 
-        for key_path, value_text, meta in items:
+        for key_path, value_text, meta, pos_start, pos_end in items:
             sub_chunks = self._chunk_value(
-                key_path, value_text, meta, global_idx, extension
+                key_path, value_text, meta, pos_start, pos_end, global_idx, extension
             )
             chunks.extend(sub_chunks)
             global_idx += len(sub_chunks)
@@ -82,7 +107,7 @@ class JSONSplitter(DocumentSplitter):
     @staticmethod
     def _scalar_text(node: ts.Node) -> str:
         """Return the decoded text of a scalar node."""
-        return node.text.decode("utf-8", errors="replace").strip()
+        return _decode_text(node.text).strip()
 
     @staticmethod
     def _key_name(node: ts.Node) -> str:
@@ -100,9 +125,9 @@ class JSONSplitter(DocumentSplitter):
         """
         for child in node.children:
             if child.type == "string_content":
-                return child.text.decode("utf-8", errors="replace").strip()
+                return _decode_text(child.text).strip()
         # Fallback: strip surrounding quotes from the raw text
-        raw = node.text.decode("utf-8", errors="replace").strip()
+        raw = _decode_text(node.text).strip()
         if len(raw) >= 2 and raw.startswith('"') and raw.endswith('"'):
             return raw[1:-1]
         return raw
@@ -119,7 +144,8 @@ class JSONSplitter(DocumentSplitter):
         self,
         node: ts.Node,
         prefix: str,
-        results: list[tuple[str, str, dict[str, str]]],
+        results: list[tuple[str, str, dict[str, str], int, int]],
+        raw: bytes,
     ) -> None:
         """Recursively walk the AST, collecting leaf values with key paths."""
         # tree-sitter-json wraps top-level values in a 'document' node;
@@ -131,7 +157,7 @@ class JSONSplitter(DocumentSplitter):
                 or self._first_child_of(node, "array")
             )
             if inner is not None:
-                self._walk_value(inner, prefix, results)
+                self._walk_value(inner, prefix, results, raw)
             return
 
         if self._is_leaf(node.type):
@@ -141,7 +167,14 @@ class JSONSplitter(DocumentSplitter):
                 "key_path": key_path,
                 "value_type": self._infer_json_type(node),
             }
-            results.append((key_path, value, meta))
+            # Convert byte offsets to character offsets
+            pos_start = _byte_to_char_offset(
+                raw.decode("utf-8", errors="replace"), node.start_byte
+            )
+            pos_end = _byte_to_char_offset(
+                raw.decode("utf-8", errors="replace"), node.end_byte
+            )
+            results.append((key_path, value, meta, pos_start, pos_end))
             return
 
         if node.type == "object":
@@ -156,7 +189,7 @@ class JSONSplitter(DocumentSplitter):
                 val_node = children_list[1]
                 key_str = self._key_name(key_node)
                 child_path = f"{prefix}.{key_str}" if prefix else key_str
-                self._walk_value(val_node, child_path, results)
+                self._walk_value(val_node, child_path, results, raw)
 
         elif node.type == "array":
             idx = 0
@@ -165,7 +198,7 @@ class JSONSplitter(DocumentSplitter):
                 if child.type in (",", "[", "]"):
                     continue
                 child_path = f"{prefix}.{idx}" if prefix else str(idx)
-                self._walk_value(child, child_path, results)
+                self._walk_value(child, child_path, results, raw)
                 idx += 1
 
     @staticmethod
@@ -179,7 +212,7 @@ class JSONSplitter(DocumentSplitter):
         if t == "null":
             return "null"
         if t == "number":
-            text = node.text.decode("utf-8", errors="replace").strip()
+            text = _decode_text(node.text).strip()
             if "." in text or "e" in text.lower():
                 return "float"
             try:
@@ -194,6 +227,8 @@ class JSONSplitter(DocumentSplitter):
         key_path: str,
         text: str,
         metadata: dict[str, str],
+        value_position_start: int,
+        value_position_end: int,
         start_index: int,
         extension: str = "",
     ) -> list[Chunk]:
@@ -207,6 +242,8 @@ class JSONSplitter(DocumentSplitter):
                     chunk_index=start_index,
                     source="",
                     metadata=metadata,
+                    position_start=value_position_start,
+                    position_end=value_position_end,
                 )
             ]
 
@@ -227,6 +264,8 @@ class JSONSplitter(DocumentSplitter):
                     chunk_index=start_index + len(chunks),
                     source="",
                     metadata=dict(metadata),
+                    position_start=value_position_start + start,
+                    position_end=value_position_start + end,
                 )
             )
             advance = size - overlap

@@ -49,6 +49,8 @@ class TextSplitter(DocumentSplitter):
                     content=text,
                     chunk_index=len(chunks),
                     source=source,
+                    position_start=start,
+                    position_end=end,
                 )
             )
 

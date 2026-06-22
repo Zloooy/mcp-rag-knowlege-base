@@ -1,0 +1,196 @@
+# SCP-67
+
+**Item #:** SCP-67
+
+**Object Class:** Euclid
+
+**Series:** explained
+
+**Author:** Unknown
+
+**Rating:** 264
+
+**Tags:** _licensebox, building, euclid, explained, fungus, hallucination, radioactive, scp
+
+**Hubs:** algorithm-curated-recommendations, scp-ex
+
+**URL:** https://scp-wiki.wikidot.com/scp-067-ex
+
+---
+
+## Description
+
+<html><body><div id="page-content">
+
+<p><strong>Item #:</strong> SCP-067-EX</p>
+<p><strong>Object Class:</strong> <span style="text-decoration: line-through;">Euclid</span> Explained (See Addenda)</p>
+<p><strong>Special Containment Procedures:</strong> SCP-067 is to be contained on location at 02 Everett Road, Bristol ME, 04554. Everett Road is to be removed from all map databases, and is to be labelled private property to discourage accidental trespassing. A fence is to be constructed around the premises, and cameras placed within the property.</p>
+<p>SCP-067 is to receive follow-up examinations once per month by SCP-067's research team (based out of Site-162 in Jay, VT). Repairs to the exterior are to be made as needed, though none are permitted on the interior.</p>
+<p><span style="text-decoration: line-through;">After thorough review, Foundation staff of level 2 clearance or higher are potentially eligible for a period of stay at SCP-067. Applicants must fill out Form W-067-19. Both the Security Director for Site-162, as well as the director of the applicant's facility, must approve the application. Time of continuous stay within SCP-067 is not to exceed a period of 3 days.</span> <em>This practice has been permanently suspended. Containment procedures for this item are undergoing extensive reevaluation. See Addendum 067c.</em></p>
+<p><strong>Addendum 06/11/2004:</strong> At this time, SCP-067 is considered to be non-anomalous, and has been marked as explained. The procedures outlined above are to be considered nullified, and are preserved for historical purposes only. The building itself has been demolished, and the land is now being used for Foundation weapons and technology field testing. Information regarding GoI-L19 has been handed over to local law enforcement.</p>
+<p><strong>Description:</strong> SCP-067, also known as "Rurik Inn" by its welcome sign, is a 20th-century rustic inn located in Bristol, ME. The building has a total of 16 rooms and is in fairly good condition. From the exterior, SCP-067 appears (and has been described to be) completely typical for the architecture of Bristol, ME.</p>
+<p>The entirety of the inside of SCP-067 is covered with — and inhabited by — roughly 11,200 species of fungi. While several of these fungi have yet to be identified, the majority are known species. Fungi within SCP-067 have shown the ability to move and grow almost instantaneously, and often tend to do so in tandem with each other. Several forms of toxic molds have been discovered within the building, though the danger this poses to the health of personnel is minimal, and well within acceptable limits.</p>
+<p>Multiple species of animals — ranging from deer, to pigs, to squirrels, to birds, etc. — have been noted to inhabit SCP-067. Animals bear tumorous growths and fungal infections on the majority of their bodies, and have occasionally been observed walking upright while wearing formal clothing. These entities have been collectively designated SCP-067-1. SCP-067-1 appear to act as the caretakers of the inn, and will often greet guests<sup class="footnoteref"><a class="footnoteref" href="javascript:;" id="footnoteref-1" onclick="WIKIDOT.page.utils.scrollToReference('footnote-1')">1</a></sup>, provide them meals, and show them to a bedroom.</p>
+<p>Due to currently unknown factors, both video cameras and audio recording devices do not function properly within SCP-067. As such, all research regarding the anomaly is conducted in person.</p>
+<p>Individuals entering SCP-067 have reported feelings of anxiety and unease at seeing both the interior of the building and instances of SCP-067-1. This is not believed to be an anomalous effect, but merely a natural reaction. However, shortly after being shown to a bedroom, individuals have reported intense feelings of happiness and relaxation. Persons who have spent the night at SCP-067 have claimed they slept incredibly well, experienced pleasant dreams, and awoke content, refreshed, and de-stressed. Research into this phenomenon is ongoing.</p>
+<div class="collapsible-block">
+<div class="collapsible-block-folded"><a class="collapsible-block-link" href="javascript:;">+ Show Addendum 067a</a></div>
+<div class="collapsible-block-unfolded" style="display:none">
+<div class="collapsible-block-unfolded-link"><a class="collapsible-block-link" href="javascript:;">hide</a></div>
+<div class="collapsible-block-content">
+<p><strong>Addendum 067a:</strong> Recent soil analysis of the property of SCP-067 has revealed unusually high amounts of acetic acid, adipocere<sup class="footnoteref"><a class="footnoteref" href="javascript:;" id="footnoteref-2" onclick="WIKIDOT.page.utils.scrollToReference('footnote-2')">2</a></sup>, and thiols. Such substances are most likely the result of animal decomposition, and could be a contributing factor to SCP-067's unusual density of fungi, as well as its pungent smell.</p>
+<p>Further inspection has also revealed that the usage of recording devices within SCP-067 is only disrupted if the equipment used is particularly sensitive to external conditions (though what these particular conditions are is uncertain). The research team has changed their equipment accordingly. Recently recorded footage from inside the inn has shown numerous discrepancies with the current item description. Notably, instances of SCP-067-1 were not observed to greet, offer meals to, or show bedrooms to anyone, and at no point could be seen wearing clothing. It has been proposed that this could mean SCP-067-1's appearance is altered by a cognitohazard.</p>
+</div>
+</div>
+</div>
+<br/>
+<div class="collapsible-block">
+<div class="collapsible-block-folded"><a class="collapsible-block-link" href="javascript:;">+ Show Addendum 067b</a></div>
+<div class="collapsible-block-unfolded" style="display:none">
+<div class="collapsible-block-unfolded-link"><a class="collapsible-block-link" href="javascript:;">hide</a></div>
+<div class="collapsible-block-content">
+<p><strong>Addendum 067b:</strong> Analysis has shown individual accounts of events occurring inside SCP-067 to be inconsistent not only with video recording, but with each other. A confirmation test, logged by Dr. Kleinsmann, Dr. Orion, and several tripod-mounted camcorders, has yielded the following results.</p>
+<table class="wiki-content-table">
+<tr>
+<th colspan="3"><strong>Experiment 067-b6</strong></th>
+</tr>
+<tr>
+<td><strong>Supervisor:</strong> Dr. Kleinsmann</td>
+<td><strong>Date:</strong> 5/02/2004</td>
+<td><strong>Location:</strong> SCP-067</td>
+</tr>
+<tr>
+<td colspan="3" style="text-align: center;"><strong>Additional Information</strong></td>
+</tr>
+<tr>
+<td colspan="2"><strong>Preliminary Supervisor Notes:</strong> Dr. Loginova is out today, but I've decided to approve today's tests regardless. Orion will be filling in.</td>
+<td colspan="2"><strong>Involved Personnel:</strong> Dr. Kleinsmann, Junior Researcher Emily Orion, Containment Staff</td>
+</tr>
+<tr>
+<td colspan="3" style="text-align: center;"><strong>Procedure</strong></td>
+</tr>
+<tr>
+<td colspan="3"><br/>
+1. Set up recording equipment in various locations throughout the house.<br/>
+<br/>
+2a. Remain in SCP-067 for a duration of 8 hours. Analyze surroundings and events.<br/>
+<br/>
+2b. Remain within line of sight of the cameras whenever possible.<br/>
+<br/>
+3. Record observations.</td>
+</tr>
+<tr>
+<td colspan="3" style="text-align: center;"><strong>Results</strong></td>
+</tr>
+<tr>
+<td><strong>Kleinsmann</strong></td>
+<td><strong>Orion</strong></td>
+<td><strong>Camera</strong></td>
+</tr>
+<tr>
+<td>First instance of SCP-067-1 noted at roughly 1:33 PM in dining room: Raccoon laying on table.</td>
+<td>Raccoon on dining room table, 1:35 PM. It's sleeping.</td>
+<td><em>Cameras in dining hall recorded a raccoon having entered the dining room at 1:28 PM, where it climbed up on the table and slept for several hours. No evidence indicates this was an instance of SCP-067-1, and was likely an ordinary raccoon.</em></td>
+</tr>
+<tr>
+<td>Instance of SCP-067-1 (A deer) approached us and motioned us towards the bedrooms. 2:18 PM. Deer was badly manged.</td>
+<td>At around 2:18 PM an instance of SCP-067-1 indicated through nonverbal means it would be making us dinner.</td>
+<td><em>Cameras in hallway 1 recorded a badly manged deer flailing wildly, standing on its hind legs several times.</em></td>
+</tr>
+<tr>
+<td>Emily and I found a severed moose leg in the fridge at 4:55 PM</td>
+<td>Kleinsmann approached me at 4:59 PM with a moldy piece of food that appeared to be a chicken wing. The walls are moving.</td>
+<td><em>Cameras in both the Kitchen and the Lounge recorded Dr. Kleinsmann obtaining a mushroom-covered stick from near the fridge, mumbling the phrase "They're working together…" and proceeding to show the stick to Dr. Orion, who at the time was sitting on the couch in the living room staring blankly at the walls, which at no time moved.</em></td>
+</tr>
+<tr>
+<td>5:41 PM Animals in the mold want to show me something. I can see it in there <em>(sic)</em> eyes. General feeling of calmness.</td>
+<td>I've been shown my room by a lovely fox. He's sitting here on my bed. Thank you fox. Time is 6:02 PM.</td>
+<td><em>Cameras throughout the house show Dr. Kleinsmann intently observing several squirrels, all of whom act disoriented. Dr. Orion can be observed in bedroom 2 petting a taxidermied red fox.</em></td>
+</tr>
+<tr>
+<td colspan="3" style="text-align: center;"><strong>Post-Results Supervisor Notes</strong></td>
+</tr>
+<tr>
+<td colspan="3">We can now confirm that the anomalous qualities of SCP-067 are not as physical as we first thought. All of the animals filmed during the experiment were most likely ordinary animals under SCP-067's influence. It is possible that the inn, or possibly the unusual amount of fungi inside it, are affecting the minds of animals and individuals inside the building. This would explain the odd behavior observed among the animals.<br/>
+<br/>
+Of note is the fact that the deer mentioned in the above log bears strong resemblance to one that was struck by a truck driver later that night roughly 3 km away<sup class="footnoteref"><a class="footnoteref" href="javascript:;" id="footnoteref-3" onclick="WIKIDOT.page.utils.scrollToReference('footnote-3')">3</a></sup>. The description of the deer — as given by the driver to the police department — matches the erratic behavior of the deer described in the log.<br/>
+<br/>
+It is clear to SCP-067's research staff that at least a portion of the current description for SCP-067 is demonstrably false. It is likely we are dealing with a mind-affecting phenomena, which is possibly memetic or hallucinogenic in nature.</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<br/>
+<div class="collapsible-block">
+<div class="collapsible-block-folded"><a class="collapsible-block-link" href="javascript:;">+ Show Addendum 067c</a></div>
+<div class="collapsible-block-unfolded" style="display:none">
+<div class="collapsible-block-unfolded-link"><a class="collapsible-block-link" href="javascript:;">hide</a></div>
+<div class="collapsible-block-content">
+<blockquote>
+<p><strong>To:</strong> Containment Specialist Armstrong<br/>
+<strong>From:</strong> Dr. Kleinsmann<br/>
+<strong>Subject:</strong> 067 Request For Immediate Containment Revisions</p>
+<p>Following additional soil analysis (conducted by Dr. Loginova), it has come to our attention that the organic materials inside and around the anomaly are emitting baseline radiation levels of 1 mSv/h. This is good news in that we now better understand SCP-067, but bad news when you account for Emily Orion and I soaking up an average of 24 mSv (or roughly 10 years worth of background radiation exposure) over the course of a single day-long excursion. And we've done 11 of those excursions in the past six months. This is almost certainly why our original equipment was having difficulty functioning.</p>
+<p>See my attached schedule and get back to me as soon as you can.</p>
+</blockquote>
+</div>
+</div>
+</div>
+<br/>
+<div class="collapsible-block">
+<div class="collapsible-block-folded"><a class="collapsible-block-link" href="javascript:;">+ Show Addendum 067d</a></div>
+<div class="collapsible-block-unfolded" style="display:none">
+<div class="collapsible-block-unfolded-link"><a class="collapsible-block-link" href="javascript:;">hide</a></div>
+<div class="collapsible-block-content">
+<p><strong>Addendum 067d:</strong><br/>
+As of 6/11/2004, SCP-067 is to be considered an explained phenomenon. This decision was made after two separate and crucial discoveries.</p>
+<p>1. The discovery of a previously unknown fungus, dubbed "Orion's Cup" (<em>Calicem orion</em>). This fungus was noted to produce a chemical compound (named "CT4") that interferes with neurotransmitters (including the reuptake of serotonin and dopamine), resulting in mild hallucinations and a feeling of euphoria. CT4 is also responsible for partial loss of motor control, though this effect is less apparent in humans. This accounts for the bizarre behavior observable within a majority of the animals in the inn, who are most likely drawn to the fungi due to it being a rich food source.</p>
+<p>It was also concluded that the presence of the fungi itself, while unusual, could potentially be explained by the presence of numerous decaying organics underground and/or high levels of radiation. Such scenarios are uncommon due to their nature, but are wholly within the realm of understanding.</p>
+<p>2. Following the identification of high radiation within the soil, excavation of the area was approved on ██/██/██ by Containment Specialist Lisa P. Armstrong. This prompted the discovery of ██ kg of uranium ore, as well as 29 human corpses in various stages of decomposition directly underneath SCP-067-EX. Examination of the bodies suggests the cause of death to be a variety of cancerous growths (symptoms of chronic radiation poisoning). Various other materials found alongside the ore bear resemblance to those used in the making of nuclear reactors. It is believed that the decaying bodies, in conjunction with radiation, induced the flourishing of fungi within the building, which in turn attracted other animals.</p>
+<p>The individuals responsible for the presence of the bodies, ores, and materials (designated GoI-L19) have not been identified. It is possible that this group is still active and are attempting to construct a nuclear reactor using expendable workers under unsafe/illegal conditions. Their location and motives are unclear, but all relevant information has been turned over to both local and federal departments. If found, individuals of this group must be detained to ensure they do not pose an information security risk.</p>
+<p>Further perplexing is the fact that most of the deceased individuals were deemed to have died <em>after</em> the area came under Foundation control as SCP-067-EX. It is likely that SCP-067-EX’s premises were breached under cover of night, as the security cameras placed around the perimeter of the area were not equipped with an infrared filter, and functioned incredibly poorly in low light conditions. This in and of itself constitutes a significant Foundation oversight, and upon further inspection, it is not believed that SCP-067-EX’s containment procedures were ever up to Foundation standards.</p>
+<p>Disciplinary action will be taken against SCP-067-EX’s containment team, as their oversight is responsible for GoI-L19's continued activity and, consequently, completely avoidable civilian deaths and potential security breaches.</p>
+</div>
+</div>
+</div>
+<br/>
+<br/>
+<div class="footnotes-footer">
+<div class="title">Footnotes</div>
+<div class="footnote-footer" id="footnote-1"><a href="javascript:;" onclick="WIKIDOT.page.utils.scrollToReference('footnoteref-1')">1</a>. Instances of SCP-067-1 have so far not proven capable of speech, but appear to understand English and some French</div>
+<div class="footnote-footer" id="footnote-2"><a href="javascript:;" onclick="WIKIDOT.page.utils.scrollToReference('footnoteref-2')">2</a>. A waxy substance made via the breakdown of fat tissues</div>
+<div class="footnote-footer" id="footnote-3"><a href="javascript:;" onclick="WIKIDOT.page.utils.scrollToReference('footnoteref-3')">3</a>. See article by Lincoln County News (lcnme): "Man In Truck Jumped By Crazy Deer"</div>
+</div>
+<div class="licensebox">
+<div class="collapsible-block">
+<div class="collapsible-block-folded"><a class="collapsible-block-link" href="javascript:;">‡ Licensing / Citation</a></div>
+<div class="collapsible-block-unfolded" style="display:none">
+<div class="collapsible-block-unfolded-link"><a class="collapsible-block-link" href="javascript:;">‡ Hide Licensing / Citation</a></div>
+<div class="collapsible-block-content">
+<p>Cite this page as:</p>
+<div class="list-pages-box"> <div class="list-pages-item">
+<blockquote>
+<p>"<a href="/scp-067-ex">SCP-067-EX</a>" by Eekium, from the <a href="https://scpwiki.com">SCP Wiki</a>. Source: <a href="https://scpwiki.com/scp-067-ex">https://scpwiki.com/scp-067-ex</a>. Licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA</a>.</p>
+</blockquote>
+</div>
+</div>
+<p>For information on how to use this component, see the <a href="/component:license-box">License Box component</a>. To read about licensing policy, see the <a href="/licensing-guide">Licensing Guide</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div></body></html>
+
+---
+
+## Metadata
+
+| Key | Value |
+|-----|-------|
+| Item Number | SCP-67 |
+| Object Class | Euclid |
+| Series | explained |
+| Author | Unknown |
+| Rating | 264 |
+

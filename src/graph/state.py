@@ -15,6 +15,9 @@ class RAGState(TypedDict, total=False):
         broadened_query  – broadened query used after retry loops (overwrite)
         retrieved_chunks – chunks returned by each retrieve pass (overwrite)
         relevant_chunks  – chunks that passed relevance grading (overwrite)
+        seen_chunk_ids   – chunk IDs already retrieved in previous broaden passes
+                         – used to deduplicate results across broaden iterations;
+                           accumulates IDs so a chunk is never returned twice
         answer           – final generated answer (overwrite)
         broaden_count    – how many broaden-and-retry loops executed (overwrite)
     """
@@ -24,5 +27,6 @@ class RAGState(TypedDict, total=False):
     broadened_query: str
     retrieved_chunks: list[dict]
     relevant_chunks: list[dict]
+    seen_chunk_ids: set[str]
     answer: str
     broaden_count: int

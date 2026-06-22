@@ -1,0 +1,31 @@
+services:
+  mcp-rag:
+    build: .
+    container_name: mcp-rag-server
+    ports:
+      - "8000:8000"
+    environment:
+      - RAG_CHROMA_PERSIST_DIR=/data/chroma_db
+      - RAG_DOCUMENTS_DIR=/data/documents
+      - RAG_LOG_LEVEL=${RAG_LOG_LEVEL:-INFO}
+      - RAG_OLLAMA_BASE_URL=${RAG_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      - RAG_OLLAMA_MODEL=${RAG_OLLAMA_MODEL:-qwen2.5:3b}
+      - RAG_OPENAI_COMPLETIONS_BASE_URL=${RAG_OPENAI_COMPLETIONS_BASE_URL:-}
+      - RAG_OPENAI_COMPLETIONS_MODEL=${RAG_OPENAI_COMPLETIONS_MODEL:-}
+      - RAG_OPENAI_COMPLETIONS_API_KEY=${RAG_OPENAI_COMPLETIONS_API_KEY:-}
+      - RAG_OPENAI_EMBEDDINGS_BASE_URL=${RAG_OPENAI_EMBEDDINGS_BASE_URL:-}
+      - RAG_OPENAI_EMBEDDINGS_MODEL=${RAG_OPENAI_EMBEDDINGS_MODEL:-}
+      - RAG_OPENAI_EMBEDDINGS_API_KEY=${RAG_OPENAI_EMBEDDINGS_API_KEY:-}
+    volumes:
+      - chroma_data:/data/chroma_db
+      - ${DOCUMENTS_PATH:-./rag_dataset/demo_documents}:/data/documents
+    command:
+      - "--transport"
+      - "streamable-http"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8000"
+
+volumes:
+  chroma_data:

@@ -14,6 +14,18 @@ from mcp_server.schemas import SearchResult
 from retrieval import Retriever, _tokenize, STOPWORDS
 
 
+def _clear_collection(persist_dir: str) -> None:
+    """Drop the collection so tests start clean."""
+    import chromadb
+
+    try:
+        chromadb.PersistentClient(path=persist_dir).delete_collection(
+            name=settings.CHROMA_COLLECTION
+        )
+    except Exception:
+        pass
+
+
 class TestTokenize:
     """Verify the simple tokenizer."""
 
@@ -35,6 +47,59 @@ class TestTokenize:
         assert _tokenize("") == []
 
 
+class TestCleanContentStorage:
+    """Verify that __clean_content metadata is stored during indexing and returned on retrieval."""
+
+    def test_clean_content_stored_in_metadata(
+        self, chroma_dir: Path, sample_docs: Path
+    ) -> None:
+        """Indexer should store __clean_content alongside enriched documents."""
+        import chromadb as _chromadb
+
+        from core.settings import settings
+        from retrieval import Indexer
+
+        _clear_collection(str(chroma_dir))
+        indexer = Indexer(persist_dir=str(chroma_dir))
+        indexer.index_folder(str(sample_docs))
+
+        client = _chromadb.PersistentClient(path=str(chroma_dir))
+        collection = client.get_collection(name=settings.CHROMA_COLLECTION)
+        data = collection.get(include=["metadatas", "documents"])
+
+        # Every chunk should have __clean_content matching its original text
+        for meta, doc in zip(data["metadatas"], data["documents"]):
+            clean = meta.get("__clean_content", "")
+            assert (
+                clean
+            ), f"Expected __clean_content in metadata for doc starting with: {doc[:50]}"
+            # Clean content must be a prefix of the stored document (the stored
+            # doc is enriched with filename/entity tokens appended).
+            assert doc.startswith(clean), (
+                f"Stored doc does not start with clean content.\n"
+                f"Clean: {repr(clean[:80])}\n"
+                f"Doc:   {repr(doc[:80])}"
+            )
+
+    def test_retrieved_content_is_clean(
+        self, populated_index: Path, chroma_dir: Path
+    ) -> None:
+        """Retrieved SearchResult.content should NOT contain filename/entity suffixes."""
+        retriever = Retriever(persist_dir=str(chroma_dir))
+        results = retriever.search(query="Python programming", top_k=5)
+        assert len(results) > 0
+        for r in results:
+            # Content should not end with a file stem pattern like "readme", "intro", etc.
+            words = r.content.strip().split()
+            if words:
+                last_word = words[-1].lower()
+                # File stems used in test docs are short identifiers;
+                # actual chunk content shouldn't end with entity patterns
+                assert (
+                    not last_word.startswith("scp") or len(last_word) > 3
+                ), f"Content may still have enrichment suffix: ...{words[-3:]}"
+
+
 class TestRetriever:
     """Test ChromaDB vector retrieval and BM25 scoring."""
 
@@ -50,6 +115,19 @@ class TestRetriever:
             assert r.content
             assert r.metadata.get("source")
             assert r.score > 0
+
+    def test_vector_search_returns_file_path(
+        self, populated_index: Path, chroma_dir: Path
+    ) -> None:
+        """Retrieved results should include __file_path metadata."""
+        retriever = Retriever(persist_dir=str(chroma_dir))
+        results = retriever.search(query="Python programming", top_k=5)
+        assert len(results) > 0
+        for r in results:
+            fp = r.metadata.get("__file_path", "")
+            assert (
+                fp
+            ), f"Expected __file_path in metadata for {r.metadata.get('source')}"
 
     def test_bm25_search_returns_results(
         self, populated_index: Path, chroma_dir: Path

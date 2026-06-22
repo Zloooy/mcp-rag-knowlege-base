@@ -13,6 +13,48 @@ from .base import DocumentSplitter
 from .models import Chunk, SplitResult
 
 
+def _decode_text(node_bytes: bytes | None) -> str:
+    """Safely decode bytes from a tree-sitter node to string."""
+    if node_bytes is None:
+        return ""
+    return node_bytes.decode("utf-8", errors="replace")
+
+
+def _byte_to_char_offset(content: str, byte_offset: int) -> int:
+    """Convert a UTF-8 byte offset to a character offset in *content*.
+
+    Tree-sitter parses raw UTF-8 bytes and reports *start_byte* / *end_byte*.
+    Because UTF-8 is variable-width, a byte offset does not always equal a
+    character offset (e.g. emojis or non-ASCII characters).  This helper
+    decodes progressively more of the string until the accumulated byte
+    length reaches *byte_offset*, then returns the corresponding character
+    index.
+
+    Parameters
+    ----------
+    content : str
+        The full decoded document text.
+    byte_offset : int
+        A byte position as reported by tree-sitter node properties.
+
+    Returns
+    -------
+    int
+        The equivalent character (Unicode code-point) offset.
+    """
+    if byte_offset <= 0:
+        return 0
+    # Re-encode progressively larger prefixes to find the matching char index.
+    # Binary-search style: we know the answer is between 0 and len(content),
+    # but a simple linear scan is fast enough for typical file sizes and avoids
+    # O(n^2) behaviour because we start from where we left off.
+    # For very large files this could be optimised with a precomputed table.
+    encoded = content.encode("utf-8")
+    if byte_offset > len(encoded):
+        byte_offset = len(encoded)
+    return len(encoded[:byte_offset].decode("utf-8"))
+
+
 def _make_parser(language_module: object, lang_fn: str) -> ts.Parser | None:
     """Create a tree-sitter parser or return ``None`` on failure."""
     try:
@@ -69,7 +111,7 @@ class CodeSplitter(DocumentSplitter):
         raw = content.encode("utf-8")
         tree = parser.parse(raw)
 
-        units = self._extract_units(tree.root_node, ext)
+        units = self._extract_units(tree.root_node, ext, raw)
 
         if not units:
             # No parseable structure — fall back to plain splitting
@@ -80,8 +122,10 @@ class CodeSplitter(DocumentSplitter):
         chunks: list[Chunk] = []
         global_idx = 0
 
-        for unit_text, metadata in units:
-            sub_chunks = self._chunk_unit(unit_text, metadata, global_idx, extension)
+        for unit_text, metadata, pos_start, pos_end in units:
+            sub_chunks = self._chunk_unit(
+                unit_text, metadata, pos_start, pos_end, global_idx, extension
+            )
             chunks.extend(sub_chunks)
             global_idx += len(sub_chunks)
 
@@ -90,22 +134,30 @@ class CodeSplitter(DocumentSplitter):
     # -- internal helpers -----------------------------------------------------
 
     @staticmethod
-    def _extract_units(node: ts.Node, ext: str) -> list[tuple[str, dict[str, str]]]:
-        """Extract top-level function/class definitions as (text, metadata) pairs."""
-        results: list[tuple[str, dict[str, str]]] = []
+    def _extract_units(
+        node: ts.Node, ext: str, raw: bytes
+    ) -> list[tuple[str, dict[str, str], int, int]]:
+        """Extract top-level function/class definitions as
+        ``(text, metadata, position_start, position_end)`` tuples."""
+        results: list[tuple[str, dict[str, str], int, int]] = []
 
         if ext == "py":
-            _PythonExtractor.extract(node, results)
+            _PythonExtractor.extract(node, results, raw)
         elif ext == "js":
-            _JSExtractor.extract(node, results)
+            _JSExtractor.extract(node, results, raw)
         else:
-            _TSExtractor.extract(node, results)
+            _TSExtractor.extract(node, results, raw)
 
         return results
 
     @staticmethod
     def _chunk_unit(
-        text: str, metadata: dict[str, str], start_index: int, extension: str = ""
+        text: str,
+        metadata: dict[str, str],
+        unit_position_start: int,
+        unit_position_end: int,
+        start_index: int,
+        extension: str = "",
     ) -> list[Chunk]:
         size, overlap = get_chunk_params(extension)
 
@@ -116,6 +168,8 @@ class CodeSplitter(DocumentSplitter):
                     chunk_index=start_index,
                     source="",
                     metadata=metadata,
+                    position_start=unit_position_start,
+                    position_end=unit_position_end,
                 )
             ]
 
@@ -136,6 +190,8 @@ class CodeSplitter(DocumentSplitter):
                     chunk_index=start_index + len(chunks),
                     source="",
                     metadata=dict(metadata),
+                    position_start=unit_position_start + start,
+                    position_end=unit_position_start + end,
                 )
             )
             advance = size - overlap
@@ -153,13 +209,17 @@ class _PythonExtractor:
     """Extract top-level FunctionDef and ClassDef nodes from a Python AST."""
 
     @staticmethod
-    def extract(node: ts.Node, results: list[tuple[str, dict[str, str]]]) -> None:
+    def extract(
+        node: ts.Node,
+        results: list[tuple[str, dict[str, str], int, int]],
+        raw: bytes,
+    ) -> None:
         for child in node.children:
             if child.type in ("function_definition", "class_definition"):
                 name = ""
                 for c in child.children:
                     if c.type == "identifier":
-                        name = c.text.decode("utf-8", errors="replace")
+                        name = _decode_text(c.text)
                         break
 
                 # Determine whether this is a class or function unit
@@ -176,7 +236,7 @@ class _PythonExtractor:
                     if parent.type == "class_definition":
                         for gc in parent.children:
                             if gc.type == "identifier":
-                                cls_name = gc.text.decode("utf-8", errors="replace")
+                                cls_name = _decode_text(gc.text)
                                 break
                         break
                     parent = parent.parent
@@ -187,22 +247,34 @@ class _PythonExtractor:
                     "line_start": str(child.start_point[0] + 1),
                     "line_end": str(child.end_point[0] + 1),
                 }
-                results.append((child.text.decode("utf-8", errors="replace"), meta))
+
+                # Convert byte offsets to character offsets
+                pos_start = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.start_byte
+                )
+                pos_end = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.end_byte
+                )
+                results.append((_decode_text(child.text), meta, pos_start, pos_end))
             else:
-                _PythonExtractor.extract(child, results)
+                _PythonExtractor.extract(child, results, raw)
 
 
 class _JSExtractor:
     """Extract top-level function declarations, arrow functions, and methods from JS AST."""
 
     @staticmethod
-    def extract(node: ts.Node, results: list[tuple[str, dict[str, str]]]) -> None:
+    def extract(
+        node: ts.Node,
+        results: list[tuple[str, dict[str, str], int, int]],
+        raw: bytes,
+    ) -> None:
         for child in node.children:
             if child.type == "function_declaration":
                 name = ""
                 for c in child.children:
                     if c.type == "identifier":
-                        name = c.text.decode("utf-8", errors="replace")
+                        name = _decode_text(c.text)
                         break
                 meta: dict[str, str] = {
                     "function_name": name,
@@ -210,7 +282,13 @@ class _JSExtractor:
                     "line_start": str(child.start_point[0] + 1),
                     "line_end": str(child.end_point[0] + 1),
                 }
-                results.append((child.text.decode("utf-8", errors="replace"), meta))
+                pos_start = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.start_byte
+                )
+                pos_end = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.end_byte
+                )
+                results.append((_decode_text(child.text), meta, pos_start, pos_end))
             elif child.type == "lexical_declaration":
                 # Check for arrow function assignment: const foo = (...) => ...
                 for c in child.children:
@@ -223,15 +301,21 @@ class _JSExtractor:
                                     "line_start": str(c.start_point[0] + 1),
                                     "line_end": str(c.end_point[0] + 1),
                                 }
+                                pos_start = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), c.start_byte
+                                )
+                                pos_end = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), c.end_byte
+                                )
                                 results.append(
-                                    (c.text.decode("utf-8", errors="replace"), meta)
+                                    (_decode_text(c.text), meta, pos_start, pos_end)
                                 )
                                 break
             elif child.type == "method_definition":
                 name = ""
                 for c in child.children:
                     if c.type == "property_identifier":
-                        name = c.text.decode("utf-8", errors="replace")
+                        name = _decode_text(c.text)
                         break
                 meta: dict[str, str] = {
                     "function_name": name,
@@ -239,22 +323,32 @@ class _JSExtractor:
                     "line_start": str(child.start_point[0] + 1),
                     "line_end": str(child.end_point[0] + 1),
                 }
-                results.append((child.text.decode("utf-8", errors="replace"), meta))
+                pos_start = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.start_byte
+                )
+                pos_end = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.end_byte
+                )
+                results.append((_decode_text(child.text), meta, pos_start, pos_end))
             else:
-                _JSExtractor.extract(child, results)
+                _JSExtractor.extract(child, results, raw)
 
 
 class _TSExtractor:
     """Extract top-level function declarations, class members, and arrow functions from TS AST."""
 
     @staticmethod
-    def extract(node: ts.Node, results: list[tuple[str, dict[str, str]]]) -> None:
+    def extract(
+        node: ts.Node,
+        results: list[tuple[str, dict[str, str], int, int]],
+        raw: bytes,
+    ) -> None:
         for child in node.children:
             if child.type == "function_declaration":
                 name = ""
                 for c in child.children:
                     if c.type == "identifier":
-                        name = c.text.decode("utf-8", errors="replace")
+                        name = _decode_text(c.text)
                         break
                 meta: dict[str, str] = {
                     "function_name": name,
@@ -262,12 +356,18 @@ class _TSExtractor:
                     "line_start": str(child.start_point[0] + 1),
                     "line_end": str(child.end_point[0] + 1),
                 }
-                results.append((child.text.decode("utf-8", errors="replace"), meta))
+                pos_start = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.start_byte
+                )
+                pos_end = _byte_to_char_offset(
+                    raw.decode("utf-8", errors="replace"), child.end_byte
+                )
+                results.append((_decode_text(child.text), meta, pos_start, pos_end))
             elif child.type == "class_declaration":
                 cls_name = ""
                 for c in child.children:
                     if c.type == "type_identifier":
-                        cls_name = c.text.decode("utf-8", errors="replace")
+                        cls_name = _decode_text(c.text)
                         break
                 # Extract methods from class_body
                 for c in child.children:
@@ -277,7 +377,7 @@ class _TSExtractor:
                                 name = ""
                                 for gd in gc.children:
                                     if gd.type == "property_identifier":
-                                        name = gd.text.decode("utf-8", errors="replace")
+                                        name = _decode_text(gd.text)
                                         break
                                 meta: dict[str, str] = {
                                     "function_name": name,
@@ -285,8 +385,14 @@ class _TSExtractor:
                                     "line_start": str(gc.start_point[0] + 1),
                                     "line_end": str(gc.end_point[0] + 1),
                                 }
+                                pos_start = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), gc.start_byte
+                                )
+                                pos_end = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), gc.end_byte
+                                )
                                 results.append(
-                                    (gc.text.decode("utf-8", errors="replace"), meta)
+                                    (_decode_text(gc.text), meta, pos_start, pos_end)
                                 )
             elif child.type == "lexical_declaration":
                 for c in child.children:
@@ -299,9 +405,15 @@ class _TSExtractor:
                                     "line_start": str(c.start_point[0] + 1),
                                     "line_end": str(c.end_point[0] + 1),
                                 }
+                                pos_start = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), c.start_byte
+                                )
+                                pos_end = _byte_to_char_offset(
+                                    raw.decode("utf-8", errors="replace"), c.end_byte
+                                )
                                 results.append(
-                                    (c.text.decode("utf-8", errors="replace"), meta)
+                                    (_decode_text(c.text), meta, pos_start, pos_end)
                                 )
                                 break
             else:
-                _TSExtractor.extract(child, results)
+                _TSExtractor.extract(child, results, raw)

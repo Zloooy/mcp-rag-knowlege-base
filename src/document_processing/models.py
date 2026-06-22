@@ -20,12 +20,20 @@ class Chunk:
         Relative path or identifier of the source file.
     metadata : dict[str, Any]
         Extra context (e.g., section heading, function name, YAML key path).
+    position_start : int
+        Zero-based character offset of the first character of this chunk
+        in the original source document.
+    position_end : int
+        Zero-based character offset *after* the last character of this chunk
+        in the original source document (exclusive, like Python slice notation).
     """
 
     content: str
     chunk_index: int
     source: str
     metadata: dict[str, Any] = field(default_factory=dict)
+    position_start: int = 0
+    position_end: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         """Return a flat dict suitable for ChromaDB upsert."""
@@ -33,6 +41,8 @@ class Chunk:
             "content": self.content,
             "chunk_index": self.chunk_index,
             "source": self.source,
+            "position_start": self.position_start,
+            "position_end": self.position_end,
             **self.metadata,
         }
 
