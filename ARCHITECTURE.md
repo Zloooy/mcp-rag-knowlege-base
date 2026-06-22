@@ -129,7 +129,6 @@ mcp-rag-knowlege-base/
 │
 ├── .github/workflows/                # GitHub Actions CI (if configured)
 │
-├── src/                              # Python package root
 ├── pyproject.toml                    # Project metadata, dependencies, uv config
 ├── uv.lock                           # Locked dependency manifest (managed by uv)
 ├── .python-version                   # Python version pin (3.14)
@@ -139,13 +138,10 @@ mcp-rag-knowlege-base/
 ├── .env                              # Local environment overrides (gitignored)
 ├── AGENTS.md                         # Agent/contributor instructions
 ├── ARCHITECTURE.md                   # This file
-├── ISSUES.md                         # Issue tracking notes
-├── QUESTIONS.md                      # Design questions & decisions log
 ├── TASK.md                           # Task backlog
 ├── README.md                         # User-facing documentation
 ├── report.md                         # Project report
 ├── __main__.py                       # Package entry point (PYTHONPATH=uv run python -m mcp.server)
-├── session-*.md                      # Session notes / working logs
 └── skills-lock.json                  # Skill version lock file
 ```
 

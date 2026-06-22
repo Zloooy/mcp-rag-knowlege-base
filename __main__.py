@@ -12,7 +12,10 @@ _src_dir = str(_project_root / "src")
 if _src_dir not in sys.path:
     sys.path.insert(0, _src_dir)
 
+from core.logging import setup_logging
 from mcp_server.server import run_server
+
+setup_logging()
 
 if __name__ == "__main__":
     import argparse

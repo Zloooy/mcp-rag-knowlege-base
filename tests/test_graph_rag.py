@@ -570,12 +570,44 @@ class TestGraphExecution:
 
     def test_full_pipeline_with_mocks(self, populated_index) -> None:
         """Run the entire RAG pipeline end-to-end with all external deps mocked."""
+        from mcp_server.schemas import SearchResult
+        from retrieval import Retriever
+
+        # Mock retriever returns 3 chunks so the graph proceeds past retrieve
+        mock_results = [
+            SearchResult(
+                content="Python is a programming language.",
+                metadata={
+                    "source": "python_intro.md",
+                    "__file_path": "/tmp/python_intro.md",
+                },
+                score=0.9,
+            ),
+            SearchResult(
+                content="Python supports many paradigms.",
+                metadata={
+                    "source": "python_intro.md",
+                    "__file_path": "/tmp/python_intro.md",
+                },
+                score=0.8,
+            ),
+            SearchResult(
+                content="Python was created by Guido van Rossum.",
+                metadata={
+                    "source": "python_history.md",
+                    "__file_path": "/tmp/python_history.md",
+                },
+                score=0.7,
+            ),
+        ]
+        mock_retriever = MagicMock(spec=Retriever)
+        mock_retriever.search.return_value = mock_results
+
         # Build mock chains for each invocation order:
         # 1. rewrite_query (1 chain)
         # 2-4. grade_chunks (1 chain per non-empty retrieved chunk)
         # 5. generate_answer (1 chain)
         rewrite_chain = _make_mock_chain("What is Python programming?")
-        # We expect 3 retrieved chunks from the populated index, so 3 grade chains
         grade_chains = [
             _make_mock_chain("relevant: yes\nscore: 0.9"),
             _make_mock_chain("relevant: yes\nscore: 0.8"),
@@ -584,6 +616,7 @@ class TestGraphExecution:
         gen_chain = _make_mock_chain("Python is a versatile programming language.")
 
         with (
+            patch("graph.nodes.Retriever", return_value=mock_retriever),
             patch("graph.nodes._make_rewrite_chain", return_value=rewrite_chain),
             patch("graph.nodes._make_grade_chain", side_effect=grade_chains),
             patch("graph.nodes._make_generate_chain", return_value=gen_chain),
