@@ -37,5 +37,7 @@ mypy_path = "src"
 
 [dependency-groups]
 dev = [
+    "black>=26.5.1",
     "mypy>=2.1.0",
+    "pyright>=1.1.410",
 ]
