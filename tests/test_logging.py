@@ -85,9 +85,10 @@ class TestSetupLogging:
         assert root.level == logging.INFO
         assert len(root.handlers) == 1
 
-    def test_setup_logging_debug_level(self) -> None:
-        """When LOG_LEVEL=DEBUG (default from env), root logger and all project
+    def test_setup_logging_debug_level(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """When LOG_LEVEL=DEBUG, root logger and all project
         sub-loggers get DEBUG."""
+        _reload_settings_module(monkeypatch, "DEBUG")
         from core.logging import _DEBUG_LOGGERS, is_debug_enabled, setup_logging
 
         _reset_logging()
@@ -113,8 +114,11 @@ class TestSetupLogging:
 
         assert first_count == second_count == 1
 
-    def test_is_debug_enabled_returns_true_when_debug(self) -> None:
+    def test_is_debug_enabled_returns_true_when_debug(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """is_debug_enabled should return True when LOG_LEVEL is DEBUG."""
+        _reload_settings_module(monkeypatch, "DEBUG")
         from core.logging import is_debug_enabled, setup_logging
 
         setup_logging()
@@ -265,11 +269,15 @@ class TestLLMLogging:
 
         setup_logging()
 
+        # Set the llm logger to DEBUG so messages are not filtered before
+        # reaching the dedicated handler below.
+        logger = logging.getLogger("llm")
+        logger.setLevel(logging.DEBUG)
+
         # Use a dedicated handler since _reset_logging may have removed caplog's handler
         handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(logging.Formatter("%(message)s"))
-        logger = logging.getLogger("llm")
         logger.addHandler(handler)
         logger.propagate = True
 
@@ -307,11 +315,15 @@ class TestLLMLogging:
 
         setup_logging()
 
+        # Set the llm logger to DEBUG so messages are not filtered before
+        # reaching the dedicated handler below.
+        logger = logging.getLogger("llm")
+        logger.setLevel(logging.DEBUG)
+
         # Use a dedicated handler since _reset_logging may have removed caplog's handler
         handler = logging.StreamHandler()
         handler.setLevel(logging.DEBUG)
         handler.setFormatter(logging.Formatter("%(message)s"))
-        logger = logging.getLogger("llm")
         logger.addHandler(handler)
         logger.propagate = True
 
