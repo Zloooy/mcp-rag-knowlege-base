@@ -13,7 +13,9 @@ RUN pip install --no-cache-dir uv && \
     uv sync --frozen --no-dev
 
 # Copy application code and prompts
-COPY __main__.py src/ prompts/ ./
+COPY prompts/ ./prompts
+COPY src/ ./src
+COPY __main__.py ./
 
 # Persisted directories (mounted via volumes at runtime)
 RUN mkdir -p /data/chroma_db /data/documents
@@ -22,4 +24,4 @@ ENV PYTHONPATH=/app/src
 
 EXPOSE 8000
 
-ENTRYPOINT ["uv", "run", "."]
+ENTRYPOINT ["uv", "run", "--no-sync", "."]
